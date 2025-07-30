@@ -5,11 +5,10 @@ from agno.tools.googlesearch import GoogleSearchTools
 from pydantic import BaseModel
 from typing import Optional
 
-class LegalResponse(BaseModel):
+class LegalOutput(BaseModel):
     analysis: str
-    jurisprudence_links: Optional[List[str]]
+    jurisprudence_links: Optional[list[str]]
     summary: Optional[str]
-    tool_calls: Optional[List[str]]
 
 agent = Agent(
     model=OpenAIChat(id="gpt-4o", api_key=st.secrets["OPENAI_API_KEY"]),
