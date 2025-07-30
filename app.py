@@ -52,5 +52,5 @@ if prompt := st.chat_input("Pergunta legal:"):
     run_response: RunResponse = agent.run(prompt, stream=False)
     result = run_response.content
 
-    st.chat_message("assistant").markdown(result.feedback)  # ou outro campo
+    st.chat_message("assistant").markdown(result)  # ou outro campo
     st.json(result.dict())
