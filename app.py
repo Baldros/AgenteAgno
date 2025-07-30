@@ -44,8 +44,6 @@ agent = Agent(
     ),
     response_model=LegalOutput,
     structured_outputs=True,  # ativa modo estruturado
-    show_tool_calls=True,
-    markdown=False,  # ou True, depende do uso
 )
 
 if prompt := st.chat_input("Pergunta legal:"):
