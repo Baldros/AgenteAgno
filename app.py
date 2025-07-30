@@ -34,7 +34,7 @@ agent = Agent(
         5. If multiple conflicting rulings exist, highlight the divergence and discuss both perspectives.
         6. Always disclose all references and sources used.
         """
-    )
+    ),
     response_model=MyResponseModel,
 )
 
