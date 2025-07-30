@@ -45,7 +45,7 @@ agent = Agent(
 )
 
 if prompt := st.chat_input("Pergunta legal:"):
-    st.session_state.history.append({"role": "user", "content": prompt})
+    #st.session_state.history.append({"role": "user", "content": prompt})
     st.chat_message("user").markdown(prompt)
 
     # Captura a resposta validada
