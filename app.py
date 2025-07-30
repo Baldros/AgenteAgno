@@ -2,7 +2,13 @@ import streamlit as st
 from agno.agent import Agent, RunResponse
 from agno.models.openai import OpenAIChat
 from agno.tools.googlesearch import GoogleSearchTools
-from my_models import MyResponseModel  # Pydantic
+from pydantic import BaseModel
+from typing import Optional
+
+class LegalOutput(BaseModel):
+    analysis: str
+    jurisprudence_links: Optional[list[str]]
+    summary: Optional[str]
 
 agent = Agent(
     model=OpenAIChat(id="gpt-4o", api_key=st.secrets["OPENAI_API_KEY"]),
@@ -35,7 +41,7 @@ agent = Agent(
         6. Always disclose all references and sources used.
         """
     ),
-    response_model=MyResponseModel,
+    response_model=LegalOutput,
 )
 
 if prompt := st.chat_input("Pergunta legal:"):
