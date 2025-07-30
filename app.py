@@ -46,40 +46,6 @@ agent = Agent(
     structured_outputs=True,  # ativa modo estruturado
 )
 
-conversas = {}
-
-def prompt_chat(prompt: str, chat_id: Optional[int] = None):
-    if chat_id and f"Conversa {chat_id}" in conversas:
-        conversas[f"Conversa {chat_id}"].append({"role": "user", "text": prompt})
-    else:
-        chat_id = len(conversas) + 1
-        conversas[f"Conversa {chat_id}"] = [{"role": "user", "text": prompt}]
-
-    full_context = ""
-    for msg in conversas[f"Conversa {chat_id}"]:
-        full_context += f"{msg['role']}: {msg['text']}\n"
-
-    run_response = agent.run(full_context, stream=False)
-    resp = run_response.content  # Instância do seu Pydantic
-
-    conversas[f"Conversa {chat_id}"].append({"role": "assistant", "text": resp.analysis, "links": resp.jurisprudence_links})
-
-    return resp, chat_id
-    
-for chat_id, msgs in conversas.items():
-    st.header(chat_id)
-    for msg in msgs:
-        if msg["role"] == "user":
-            st.chat_message("user").markdown(msg["text"])
-        else:
-            st.chat_message("assistant").markdown(msg["text"])
-            if msg.get("links"):
-                st.write("### Jurisprudências encontradas:")
-                for link in msg["links"]:
-                    st.write(f"- {link}")
-
-
-"""
 if prompt := st.chat_input("Pergunta legal:"):
     #st.session_state.history.append({"role": "user", "content": prompt})
     st.chat_message("user").markdown(prompt)
@@ -90,4 +56,4 @@ if prompt := st.chat_input("Pergunta legal:"):
 
     st.chat_message("assistant").markdown(result.analysis)  # ou outro campo
     st.json(result.dict())
-"""
+
