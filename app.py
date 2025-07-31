@@ -1,10 +1,15 @@
 import streamlit as st
 import json
 from typing import Optional
+from agno.tools import tool
 from agno.agent import Agent, RunResponse
 from agno.models.openai import OpenAIChat
 from agno.tools.googlesearch import GoogleSearchTools
 from pydantic import BaseModel
+import requests
+import re
+import unicodedata
+
 
 # -------------------- Modelo de saída --------------------
 class LegalOutput(BaseModel):
@@ -69,6 +74,54 @@ Provide **short and actionable answers by default**, with the option to deepen t
     response_model=LegalOutput,
     structured_outputs=True,  # ativa modo estruturado
 )
+# ------------------- Tools -----------------------------------------
+@ tool
+def serch_site_by_url(url: str) -> str:
+    """
+    Tool purpose:
+    -------------
+    This function serves as an agent tool within an LLM pipeline.
+    Its role is:
+      - Accept a URL provided by a user prompt,
+      - Fetch the page via the `requests` library,
+      - Decode the content appropriately,
+      - Convert HTML to Markdown,
+      - Clean up encoding artifacts using regex,
+      - Return a clean Markdown string for agent consumption.
+    """
+
+    headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/124.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.5"
+    }
+
+    resp = requests.get(url, headers=headers, timeout=20.0)
+    resp.raise_for_status()  # Raise HTTPError on bad 4xx/5xx responses
+
+    # Step 1: Determine encoding
+    # requests uses Content-Type charset if present; otherwise
+    # it may guess using chardet or charset_normalizer via resp.apparent_encoding
+    encoding = resp.encoding or resp.apparent_encoding
+    resp.encoding = encoding  # override to ensure correct decoding
+    html = resp.text
+
+    # Step 2: Convert HTML to Markdown using your converter
+    md = convert_to_markdown(html)
+
+    # Step 3: Normalize Unicode (e.g. combine accents properly)
+    md = unicodedata.normalize('NFC', md)
+
+    # Step 4: Cleanup control characters and placeholders
+    md = md.replace('\r', ' ').replace('\xa0', ' ')
+    md = re.sub(r'�+', ' ', md)               # remove garbled replacement characters
+    md = re.sub(r'<!--.*?-->', '', md, flags=re.DOTALL)  # strip HTML comments
+    md = re.sub(r'\n{3,}', '\n\n', md)        # collapse multiple blank lines
+    md = re.sub(r'[ \t]{2,}', ' ', md)        # collapse multiple spaces/tabs
+
+    return md
 
 # -------------------- Inicialização de estado --------------------
 def new_chat(default_title: str | None = None) -> str:
